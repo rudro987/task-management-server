@@ -37,6 +37,7 @@ dbConnect();
     const db = client.db("taskologyDB");
     const usersCollection = db.collection("users");
     const blogsCollection = db.collection("blogs");
+    const tasksCollection = db.collection("tasks");
 
     app.get("/", (req, res) => {
       res.send("Taskology server running successfully!");
@@ -99,6 +100,13 @@ dbConnect();
       res.send(result);
     });
 
+    app.get("/handleTasks", async (req, res) => {
+      const toDo = await tasksCollection.find({status: "to-do"}).toArray();
+      const ongoing = await tasksCollection.find({status: "ongoing"}).toArray();
+      const completed = await tasksCollection.find({status: "completed"}).toArray();
+      res.send({toDo, ongoing, completed});
+    })
+
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -108,6 +116,12 @@ dbConnect();
         return res.send({ message: "user already exists", insertedId: null });
       }
       const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+    
+    app.post("/addTask", verifyToken, async (req, res) => {
+      const task = req.body;
+      const result = await tasksCollection.insertOne(task);
       res.send(result);
     });
 
