@@ -101,10 +101,8 @@ dbConnect();
     });
 
     app.get("/handleTasks", async (req, res) => {
-      const toDo = await tasksCollection.find({status: "to-do"}).toArray();
-      const ongoing = await tasksCollection.find({status: "ongoing"}).toArray();
-      const completed = await tasksCollection.find({status: "completed"}).toArray();
-      res.send({toDo, ongoing, completed});
+      const result = await tasksCollection.find().toArray();
+      res.send(result);
     })
 
 
@@ -135,6 +133,15 @@ dbConnect();
       const result = await usersCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
+
+    app.delete("allTasks/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await tasksCollection.deleteOne(query);
+      res.send(result);
+
+    })
+   
 
     // Admin related apis
 
